@@ -27,6 +27,10 @@ public class Record {
         return average;
     }
 
+    public double getNumber(int index) {
+        return numbers.get(index);
+    }
+
     @Override
     public String toString() {
         return numbers + " " + average;

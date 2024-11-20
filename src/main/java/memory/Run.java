@@ -2,9 +2,12 @@ package memory;
 
 import data.Record;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Run {
     private int bufferSize;
@@ -21,9 +24,8 @@ public class Run {
         this.records = new ArrayList<>();
     }
 
-    public void fillRun()
+    public void fillRun(int currentLine)
     {
-        int currentLine = 0;
         Buffer buffer = new Buffer(bufferSize);
         for(int i = 0; i < bufferNum; i ++)
         {
@@ -64,7 +66,9 @@ public class Run {
 
     public String toString()
     {
-        return records.toString();
+        return records.stream()
+                .map(Record::toString)
+                .collect(Collectors.joining("\n"));
     }
 
     public int getReadRecords()
@@ -77,5 +81,17 @@ public class Run {
         return readBuffers;
     }
 
+    public int getRunSize()
+    {
+        return records.size();
+    }
 
-}
+    public void saveRun(String filePath) {
+        try (FileWriter writer = new FileWriter(filePath, true)) {
+            for (Record record : records) {
+                writer.write(String.format("%.1f %.1f %.1f%n", record.getNumber(0), record.getNumber(1), record.getNumber(2)));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }}
