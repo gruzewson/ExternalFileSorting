@@ -75,16 +75,16 @@ public class DataManager {
         double v1, v2, v3;
         System.out.println("Enter the number of records: ");
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        int record_num = 0;
+        int recordNum;
         try {
-            record_num = Integer.parseInt(reader.readLine());
+            recordNum = Integer.parseInt(reader.readLine());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
         System.out.println("Grades to choose from are: {2, 3, 3.5, 4, 4.5, 5} \nEnter the grades: ");
         try (FileWriter writer = new FileWriter(file)) {
-            for (int i = 0; i < record_num; i++) {
+            for (int i = 0; i < recordNum; i++) {
                 String[] grades = reader.readLine().split("\\s+");
                 v1 = Double.parseDouble(grades[0]);
                 v2 = Double.parseDouble(grades[1]);

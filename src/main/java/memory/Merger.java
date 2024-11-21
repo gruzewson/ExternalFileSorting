@@ -183,9 +183,9 @@ public class Merger {
     }
 
     public static void main(String[] args) {
-        DataManager dataManager = new DataManager(10000000);
+        DataManager dataManager = new DataManager(100);
         dataManager.generateData("data");
-        Merger merger = new Merger(10, 1001, "src/main/java/data/data.txt", 10000000);
+        Merger merger = new Merger(10, 10, "src/main/java/data/data.txt", 100);
         merger.initialize();
         merger.mergeCycles++;
 
