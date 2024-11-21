@@ -87,6 +87,7 @@ public class Run {
     }
 
     public void saveRun(String filePath) {
+        //todo use buffers to save run
         try (FileWriter writer = new FileWriter(filePath, true)) {
             for (Record record : records) {
                 writer.write(String.format("%.1f %.1f %.1f%n", record.getNumber(0), record.getNumber(1), record.getNumber(2)));

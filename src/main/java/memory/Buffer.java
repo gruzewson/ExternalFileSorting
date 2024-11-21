@@ -2,7 +2,6 @@ package memory;
 
 import java.io.*;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import data.Record;
@@ -10,6 +9,7 @@ import data.Record;
 public class Buffer {
     private final int size;
     private Record[] buffer;
+    private int tail = 0;
     private int recordsRead = 0;
 
     public Buffer(int size) {
@@ -44,6 +44,7 @@ public class Buffer {
                 Record record = new Record(numbers);
                 recordsRead++;
                 buffer[i] = record;
+                tail++;
             }
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
@@ -84,4 +85,39 @@ public class Buffer {
         }
         return false;
     }
+
+    public Record getHead() {
+        return buffer[0];
+    }
+
+    public int getTail() {
+        return tail;
+    }
+
+    public Record getRecord(int index) {
+        return buffer[index];
+    }
+
+    public void addRecord(Record record) {
+        buffer[tail] = record;
+        if(tail == size - 1) {
+            System.out.println("Buffer is full");
+        }
+        else
+            tail++;
+    }
+
+    public void saveBuffer(String filePath) {
+        try (FileWriter writer = new FileWriter(filePath)) {
+            for (Record record : buffer) {
+                if (record != null) {
+                    writer.write(record.toString() + "\n");
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
 }
