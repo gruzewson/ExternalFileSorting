@@ -52,11 +52,6 @@ public class Run {
         return savedBuffers;
     }
 
-    public int getRunSize()
-    {
-        return records.size();
-    }
-
     public void saveRun(String filePath) {
         Buffer buffer = new Buffer(bufferSize);
 
