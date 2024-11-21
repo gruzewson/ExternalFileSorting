@@ -53,67 +53,126 @@ public class Merger {
         }
     }
 
-    public void mergeRuns() {
+    public void mergeRuns(int runNum) {
         String path;
         Buffer mergingBuffer = new Buffer(bufferSize);
         Buffer[] buffers = new Buffer[bufferNum];
         int[] runLine = new int[bufferNum];
         boolean[] runFinished = new boolean[bufferNum];
-        for(int i = 0; i < bufferNum; i++) {
+        int newBufferNum = bufferNum;
+        for (int i = 0; i < bufferNum; i++) {
             buffers[i] = new Buffer(bufferSize);
             runLine[i] = 0;
             runFinished[i] = false;
         }
-        for(int i = 0; i < bufferNum; i++) {
+        for (int i = runNum; i < bufferNum + runNum; i++) {
             path = "src/main/java/memory/runs/run" + i + ".txt";
-            buffers[i].readRecords(path, runLine[i]);
-            runLine[i] += bufferSize;
+            File file = new File(path);
+            if (!file.exists()) {
+                newBufferNum = i - runNum;
+                break;
+            }
+            buffers[i - runNum].readRecords(path, runLine[i - runNum]);
+            runLine[i - runNum] += bufferSize;
+        }
+
+        for(int i = 0; i < newBufferNum; i++) {
             System.out.println(i + "\n");
             System.out.println(buffers[i].toString());
         }
 
+
         PriorityQueue<HeapNode> heap = new PriorityQueue<>((r1, r2) -> {
-            if(r1.getAverage() > r2.getAverage())
-            {
+            if (r1.getAverage() > r2.getAverage()) {
                 return 1;
-            }
-            else if(r1.getAverage() < r2.getAverage())
-            {
+            } else if (r1.getAverage() < r2.getAverage()) {
                 return -1;
-            }
-            else
-            {
+            } else {
                 return 0;
             }
         });
-        for(int i = 0; i < bufferNum; i++) {
+
+        for (int i = 0; i < newBufferNum; i++) {
             HeapNode heapNode = new HeapNode(buffers[i].getHead(), i, 0);
             heap.add(heapNode);
             System.out.println(heap.toString());
         }
-        while(!checkRunFinished(runFinished)) {
-            //delete head of heap
+        while (!checkRunFinished(runFinished)) {
+            // Remove the smallest element from the heap
             HeapNode heapNode = heap.poll();
-            if(heapNode != null){
-                mergingBuffer.addRecord(heapNode.record);
-                System.out.println("merging buffer" + mergingBuffer.toString());
-                System.out.println("heap" + heap.toString());
-            }
-            System.out.println("took record from run: " + heapNode.bufferIndex + " " + heapNode.position);
-            heap.add(new HeapNode(buffers[heapNode.bufferIndex].getRecord(heapNode.position+1), heapNode.bufferIndex, heapNode.position + 1));
-            if(heapNode.position + 1 == bufferSize * bufferNum) {
-                runFinished[heapNode.bufferIndex] = true;
-            }
-
-            if(mergingBuffer.getTail() == bufferSize-1) {
-                mergingBuffer.saveBuffer("src/main/java/memory/runs/run11111.txt");
-                mergingBuffer.clearBuffer();
+            if (heapNode == null) {
                 break;
             }
+            // Add the record to the merging buffer
+            mergingBuffer.addRecord(heapNode.record);
+            System.out.println("merging buffer " + mergingBuffer.toString());
+            System.out.println("\nheap" + heap.toString());
+            System.out.println("took record from run: " + (heapNode.bufferIndex+runNum) + " " + heapNode.position);
+            if(heapNode.position == bufferSize - 1) {
+                System.out.println("buffer " + heapNode.bufferIndex + " is empty");
+                path = "src/main/java/memory/runs/run" + (heapNode.bufferIndex+runNum) + ".txt";
+                if (runLine[heapNode.bufferIndex] < bufferNum * bufferSize) { // Check if more records exist in the file
+                    buffers[heapNode.bufferIndex].clearBuffer();
+                    buffers[heapNode.bufferIndex].readRecords(path, runLine[heapNode.bufferIndex]);
+                    runLine[heapNode.bufferIndex] += bufferSize;
+                    System.out.println("buffer " + heapNode.bufferIndex + " filled");
+                    heap.add(new HeapNode(buffers[heapNode.bufferIndex].getRecord(0), heapNode.bufferIndex, 0));
+                } else {
+
+                    runFinished[heapNode.bufferIndex] = true; // Mark this run as finished
+
+                    System.out.println("run " + (heapNode.bufferIndex+runNum) + " finished");
+                    //break;
+                }
+            }
+            else{
+                heap.add(new HeapNode(buffers[heapNode.bufferIndex].getRecord(heapNode.position + 1), heapNode.bufferIndex, heapNode.position + 1));
+            }
+
+            System.out.println("merging buffer " + mergingBuffer.getTail());
+            if (mergingBuffer.getTail() == bufferSize - 1) {
+                mergingBuffer.saveBuffer("src/main/java/memory/runs/run" + mergeCycles + ".txt");
+                mergingBuffer.clearBuffer();
+                System.out.println("merging buffer " + mergingBuffer.getTail());
+                System.out.println("merging buffer cleared");
+            }
+
+            // Check if there are more records in the current buffer
+            /*int bufferIndex = heapNode.bufferIndex;
+            int nextPosition = heapNode.position + 1;
+
+            if (nextPosition < buffers[bufferIndex].getTail()) {
+                // Add the next record from the same buffer to the heap
+                heap.add(new HeapNode(buffers[bufferIndex].getRecord(nextPosition), bufferIndex, nextPosition));
+            } else {
+                // If buffer is empty, check if more records are available in the run file
+                path = "src/main/java/memory/runs/run" + bufferIndex + ".txt";
+                if (runLine[bufferIndex] < recordsNum) { // Check if more records exist in the file
+                    buffers[bufferIndex].clearBuffer();
+                    buffers[bufferIndex].readRecords(path, runLine[bufferIndex]);
+                    runLine[bufferIndex] += bufferSize;
+
+                } else {
+                    runFinished[bufferIndex] = true; // Mark this run as finished
+                }
+            }
+            System.out.println("merging buffer " + mergingBuffer.getTail());
+            if (mergingBuffer.getTail() == bufferSize - 1) {
+                mergingBuffer.saveBuffer("src/main/java/memory/runs/run" + mergeCycles + runNum + ".txt");
+                mergingBuffer.clearBuffer();
+                System.out.println("merging buffer " + mergingBuffer.getTail());
+                System.out.println("merging buffer cleared");
+                for(int i = 0; i < bufferNum; i++) {
+                    System.out.println(i + ", " + buffers[i].toString());
+                }
+
             //System.out.println("deedw\n" + mergingBuffer.toString());
+        }*/
+        }
+        if(mergingBuffer.getTail() > 0) {
+            mergingBuffer.saveBuffer("src/main/java/memory/runs/run" + mergeCycles + ".txt");
         }
         mergeCycles++;
-
     }
 
     public int getReadRecords() {
@@ -164,6 +223,7 @@ public class Merger {
     public static void main(String[] args) throws IOException {
         Merger merger = new Merger(5, 2, "src/main/java/data/data.txt", 30);
         merger.initialize();
-        merger.mergeRuns();
+        merger.mergeRuns(0);
+        //merger.mergeRuns(2);
     }
 }

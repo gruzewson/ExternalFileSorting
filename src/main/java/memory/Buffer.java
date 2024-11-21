@@ -70,6 +70,7 @@ public class Buffer {
 
     public void clearBuffer() {
         buffer = new Record[size];
+        tail = 0;
         recordsRead = 0;
     }
 
@@ -108,7 +109,7 @@ public class Buffer {
     }
 
     public void saveBuffer(String filePath) {
-        try (FileWriter writer = new FileWriter(filePath)) {
+        try (FileWriter writer = new FileWriter(filePath, true)) {
             for (Record record : buffer) {
                 if (record != null) {
                     writer.write(record.toString() + "\n");
