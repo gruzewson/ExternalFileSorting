@@ -19,10 +19,6 @@ public class Record {
         return Math.round((sum / numbers.size()) * 100.0) / 100.0;
     }
 
-    public List<Double> getNumbers() {
-        return numbers;
-    }
-
     public double getAverage() {
         return average;
     }

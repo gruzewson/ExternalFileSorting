@@ -8,16 +8,21 @@ import java.util.Random;
 
 public class DataManager {
     private static final int GRADES_NUM = 3;
-    private List<Record> records = new ArrayList<>();
+    private final List<Record> records = new ArrayList<>();
+    private int recordNum;
 
-    public void generateData(int record_num) {
-        File file = new File("src/main/java/data/data.txt");
+    public DataManager(int recordNum) {
+        this.recordNum = recordNum;
+    }
+
+    public void generateData(String fileName) {
+        File file = new File("src/main/java/data/" + fileName + ".txt");
         double[] options = {2, 3, 3.5, 4, 4.5, 5};
         double v1, v2, v3;
         Random random = new Random();
 
         try (FileWriter writer = new FileWriter(file)) {
-            for (int i = 0; i < record_num; i++) {
+            for (int i = 0; i < recordNum; i++) {
                 v1 = options[random.nextInt(options.length)];
                 v2 = options[random.nextInt(options.length)];
                 v3 = options[random.nextInt(options.length)];
@@ -44,14 +49,13 @@ public class DataManager {
                 String line;
 
                 while ((line = br.readLine()) != null) {
-                    String[] parts = line.split("\\s+"); // Split the line by whitespace
+                    String[] parts = line.split("\\s+");
                     List<Double> numbers = new ArrayList<>();
 
                     for (int i = 0; i < GRADES_NUM; i++) {
-                        numbers.add(Double.parseDouble(parts[i])); // Parse first 3 numbers
+                        numbers.add(Double.parseDouble(parts[i]));
                     }
 
-                    // Create a Record object and add it to the records list
                     records.add(new Record(numbers));
                 }
 
@@ -66,8 +70,8 @@ public class DataManager {
         }
     }
 
-    public void readFromKeyboard() {
-        File file = new File("src/main/java/data/data.txt");
+    public void readFromKeyboard(String fileName) {
+        File file = new File("src/main/java/data/" + fileName + ".txt");
         double v1, v2, v3;
         System.out.println("Enter the number of records: ");
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
@@ -101,7 +105,7 @@ public class DataManager {
 
     public static void main(String[] args) {
         String mode;
-        DataManager dataGenerator = new DataManager();
+        DataManager dataGenerator = new DataManager(100);
         if (args.length < 1) {
             mode = "generate";
         }
@@ -111,7 +115,7 @@ public class DataManager {
         switch (mode.toLowerCase()) {
             case "generate":
                 System.out.println("Generating data...");
-                dataGenerator.generateData(30);
+                dataGenerator.generateData("data");
                 dataGenerator.printRecords();
                 break;
             case "file":
@@ -121,7 +125,7 @@ public class DataManager {
                 break;
             case "keyboard":
                 System.out.println("Reading data from keyboard...");
-                dataGenerator.readFromKeyboard();
+                dataGenerator.readFromKeyboard("data");
                 dataGenerator.printRecords();
                 break;
             default:

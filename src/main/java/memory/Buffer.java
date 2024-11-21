@@ -7,14 +7,13 @@ import java.util.stream.Collectors;
 import data.Record;
 
 public class Buffer {
-    private final int size;
+    private final int maxSize;
     private Record[] buffer;
-    private int tail = 0;
-    private int recordsRead = 0;
+    private int currentSize = 0;
 
-    public Buffer(int size) {
-        this.size = size;
-        this.buffer = new Record[size];
+    public Buffer(int maxSize) {
+        this.maxSize = maxSize;
+        this.buffer = new Record[maxSize];
     }
 
     public void readRecords(String filePath, int startLine) {
@@ -28,33 +27,25 @@ public class Buffer {
                 currentLine++;
             }
 
-            for (int i = 0; i < size; i++) {
+            for (int i = 0; i < maxSize; i++) {
                 line = reader.readLine();
                 if (line == null) {
                     System.out.println("Reached the end of the file. Buffer will not be completely filled.");
-                    for (int j = i; j < size; j++) {
+                    for (int j = i; j < maxSize; j++) {
                         buffer[j] = null;
                     }
                     break;
                 }
-                //System.out.println("Reading line: " + line);
                 List<Double> numbers = Arrays.stream(line.split(" "))
                         .map(Double::parseDouble)
                         .collect(Collectors.toList());
                 Record record = new Record(numbers);
-                recordsRead++;
                 buffer[i] = record;
-                tail++;
+                currentSize++;
             }
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-        public Record[] getBuffer() {
-        return buffer;
     }
 
     @Override
@@ -64,14 +55,9 @@ public class Buffer {
                 .collect(Collectors.joining("\n"));
     }
 
-    public int getRecordsRead() {
-        return recordsRead;
-    }
-
     public void clearBuffer() {
-        buffer = new Record[size];
-        tail = 0;
-        recordsRead = 0;
+        buffer = new Record[maxSize];
+        currentSize = 0;
     }
 
     public Record[] getRecords() {
@@ -91,8 +77,8 @@ public class Buffer {
         return buffer[0];
     }
 
-    public int getTail() {
-        return tail;
+    public int getCurrentSize() {
+        return currentSize;
     }
 
     public Record getRecord(int index) {
@@ -100,20 +86,22 @@ public class Buffer {
     }
 
     public void addRecord(Record record) {
-        buffer[tail] = record;
-        if(tail == size - 1) {
+        if(currentSize == maxSize) {
             System.out.println("Buffer is full");
         }
-        else
-            tail++;
+        else {
+            buffer[currentSize] = record;
+            currentSize++;
+        }
     }
 
     public void saveBuffer(String filePath) {
         try (FileWriter writer = new FileWriter(filePath, true)) {
             for (Record record : buffer) {
-                if (record != null) {
-                    writer.write(record.toString() + "\n");
+                if (record == null) {
+                    break;
                 }
+                writer.write(String.format("%.1f %.1f %.1f%n", record.getNumber(0), record.getNumber(1), record.getNumber(2)));
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

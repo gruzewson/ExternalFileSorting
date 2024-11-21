@@ -1,7 +1,6 @@
 package memory;
 
 import data.Record;
-
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -10,12 +9,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class Run {
-    private int bufferSize;
-    private int bufferNum;
-    private String filePath;
-    private List<Record> records;
-    private int readRecords = 0;
+    private final int bufferSize;
+    private final int bufferNum;
+    private final String filePath;
+    private final List<Record> records;
     private int readBuffers = 0;
+    private int savedBuffers = 0;
 
     public Run(int bufferSize, int bufferNum, String filePath) {
         this.bufferSize = bufferSize;
@@ -33,10 +32,8 @@ public class Run {
             if(buffer.isNull())
                 break;
             readBuffers++;
-            //System.out.println(buffer.toString());
-            records.addAll(Arrays.asList(getRecordsFromBuffer(buffer)));
+            records.addAll(Arrays.asList(buffer.getRecords()));
             currentLine += bufferSize;
-            readRecords += buffer.getRecordsRead();
             buffer.clearBuffer();
         }
     }
@@ -59,26 +56,14 @@ public class Run {
         });
     }
 
-    public Record[] getRecordsFromBuffer(Buffer buffer)
-    {
-        return buffer.getRecords();
-    }
-
-    public String toString()
-    {
-        return records.stream()
-                .map(Record::toString)
-                .collect(Collectors.joining("\n"));
-    }
-
-    public int getReadRecords()
-    {
-        return readRecords;
-    }
-
     public int getReadBuffers()
     {
         return readBuffers;
+    }
+
+    public int getSavedBuffers()
+    {
+        return savedBuffers;
     }
 
     public int getRunSize()
@@ -87,12 +72,25 @@ public class Run {
     }
 
     public void saveRun(String filePath) {
-        //todo use buffers to save run
+        Buffer buffer = new Buffer(bufferSize);
         try (FileWriter writer = new FileWriter(filePath, true)) {
             for (Record record : records) {
-                writer.write(String.format("%.1f %.1f %.1f%n", record.getNumber(0), record.getNumber(1), record.getNumber(2)));
+                buffer.addRecord(record);
+                if (buffer.getCurrentSize() == bufferSize)
+                {
+                    buffer.saveBuffer(filePath);
+                    savedBuffers++;
+                    buffer.clearBuffer();
+                }
+
+            }
+            // Write any remaining records in the buffer.
+            if (buffer.getCurrentSize() > 0) {
+                buffer.saveBuffer(filePath);
+                savedBuffers++;
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }}
+    }
+}

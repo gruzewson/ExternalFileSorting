@@ -29,7 +29,6 @@ public class Main {
             run.sortRun();
             System.out.println("\nrun " + (i+1) + " after sorting\n");
             System.out.println(run.toString());
-            recordsRead += run.getReadRecords();
             buffersRead = run.getReadBuffers();
         }
 
