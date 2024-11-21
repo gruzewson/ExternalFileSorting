@@ -3,8 +3,8 @@ package data;
 import java.util.List;
 
 public class Record {
-    private List<Double> numbers;
-    private double average;
+    private final List<Double> numbers;
+    private final double average;
 
     public Record(List<Double> numbers) {
         this.numbers = numbers;

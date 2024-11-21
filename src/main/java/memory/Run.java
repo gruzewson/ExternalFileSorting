@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Run {
     private final int bufferSize;
@@ -41,18 +40,7 @@ public class Run {
     public void sortRun()
     {
         records.sort((r1, r2) -> {
-            if(r1.getAverage() > r2.getAverage())
-            {
-                return 1;
-            }
-            else if(r1.getAverage() < r2.getAverage())
-            {
-                return -1;
-            }
-            else
-            {
-                return 0;
-            }
+            return Double.compare(r1.getAverage(), r2.getAverage());
         });
     }
 
@@ -73,24 +61,22 @@ public class Run {
 
     public void saveRun(String filePath) {
         Buffer buffer = new Buffer(bufferSize);
-        try (FileWriter writer = new FileWriter(filePath, true)) {
-            for (Record record : records) {
-                buffer.addRecord(record);
-                if (buffer.getCurrentSize() == bufferSize)
-                {
-                    buffer.saveBuffer(filePath);
-                    savedBuffers++;
-                    buffer.clearBuffer();
-                }
 
-            }
-            // Write any remaining records in the buffer.
-            if (buffer.getCurrentSize() > 0) {
+        for (Record record : records) {
+            buffer.addRecord(record);
+            if (buffer.getCurrentSize() == bufferSize)
+            {
                 buffer.saveBuffer(filePath);
                 savedBuffers++;
+                buffer.clearBuffer();
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+
         }
+        // Write any remaining records in the buffer.
+        if (buffer.getCurrentSize() > 0) {
+            buffer.saveBuffer(filePath);
+            savedBuffers++;
+        }
+
     }
 }

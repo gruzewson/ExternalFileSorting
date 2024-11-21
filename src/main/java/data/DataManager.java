@@ -9,7 +9,7 @@ import java.util.Random;
 public class DataManager {
     private static final int GRADES_NUM = 3;
     private final List<Record> records = new ArrayList<>();
-    private int recordNum;
+    private final int recordNum;
 
     public DataManager(int recordNum) {
         this.recordNum = recordNum;
@@ -30,7 +30,7 @@ public class DataManager {
                 writer.write(String.format("%.1f %.1f %.1f%n", v1, v2, v3));
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
 
 
@@ -79,7 +79,7 @@ public class DataManager {
         try {
             record_num = Integer.parseInt(reader.readLine());
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
 
         System.out.println("Grades to choose from are: {2, 3, 3.5, 4, 4.5, 5} \nEnter the grades: ");
@@ -93,7 +93,7 @@ public class DataManager {
                 writer.write(String.format("%.1f %.1f %.1f%n", v1, v2, v3));
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 

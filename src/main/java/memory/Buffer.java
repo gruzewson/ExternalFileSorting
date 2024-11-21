@@ -20,10 +20,10 @@ public class Buffer {
         File file = new File(filePath);
 
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            String line = null;
+            String line;
             int currentLine = 0;
 
-            while (currentLine < startLine && (line = reader.readLine()) != null) {
+            while (currentLine < startLine && reader.readLine() != null) {
                 currentLine++;
             }
 

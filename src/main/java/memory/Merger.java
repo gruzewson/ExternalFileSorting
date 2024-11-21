@@ -1,8 +1,6 @@
 package memory;
 
 import data.DataManager;
-import data.Record;
-
 import java.io.*;
 import java.util.Objects;
 import java.util.PriorityQueue;
@@ -116,13 +114,7 @@ public class Merger {
         }
 
         PriorityQueue<HeapNode> heap = new PriorityQueue<>((r1, r2) -> {
-            if (r1.getAverage() > r2.getAverage()) {
-                return 1;
-            } else if (r1.getAverage() < r2.getAverage()) {
-                return -1;
-            } else {
-                return 0;
-            }
+            return Double.compare(r1.getAverage(), r2.getAverage());
         });
 
         for (int i = 0; i < newBufferNum; i++) {
@@ -190,7 +182,7 @@ public class Merger {
         return true;
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         DataManager dataManager = new DataManager(10000000);
         dataManager.generateData("data");
         Merger merger = new Merger(10, 1001, "src/main/java/data/data.txt", 10000000);
