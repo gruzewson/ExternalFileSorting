@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 public class DataManager {
@@ -100,6 +101,53 @@ public class DataManager {
     public void printRecords() {
         for (Record record : records) {
             System.out.println(record);
+        }
+    }
+
+    public static int runSize(String filePath) {
+        int lineCount = 0;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            while (reader.readLine() != null) {
+                lineCount++;
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Error reading file: " + filePath, e);
+        }
+
+        return lineCount;
+    }
+
+    public int howManyRuns() {
+        int runs = 0;
+        File dir = new File("src/main/java/memory/runs");
+        for(File file: Objects.requireNonNull(dir.listFiles()))
+        {
+            if (!file.isDirectory())
+                runs++;
+        }
+        return runs;
+    }
+
+    public void deleteOldRuns(int cycle) {
+        File dir = new File("src/main/java/memory/runs");
+        for (File file : Objects.requireNonNull(dir.listFiles())) {
+            if (!file.isDirectory()) {
+                String fileName = file.getName();
+                // Extract the cycle number from the filename
+                if (fileName.startsWith("run" + cycle)) {
+                    file.delete();
+                }
+            }
+        }
+    }
+
+    public void deleteAllRuns() {
+        File dir = new File("src/main/java/memory/runs");
+        for (File file : Objects.requireNonNull(dir.listFiles())) {
+            if (!file.isDirectory()) {
+                file.delete();
+            }
         }
     }
 

@@ -3,6 +3,7 @@ package memory;
 import data.Record;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 public class Run {
@@ -37,9 +38,7 @@ public class Run {
 
     public void sortRun()
     {
-        records.sort((r1, r2) -> {
-            return Double.compare(r1.getAverage(), r2.getAverage());
-        });
+        records.sort(Comparator.comparingDouble(Record::getAverage));
     }
 
     public int getReadBuffers()
