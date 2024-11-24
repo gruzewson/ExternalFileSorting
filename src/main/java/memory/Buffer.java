@@ -30,7 +30,7 @@ public class Buffer {
             for (int i = 0; i < maxSize; i++) {
                 line = reader.readLine();
                 if (line == null) {
-                    System.out.println("Reached the end of the file. Buffer will not be completely filled.");
+                    //System.out.println("Reached the end of the file. Buffer will not be completely filled.");
                     for (int j = i; j < maxSize; j++) {
                         buffer[j] = null;
                     }

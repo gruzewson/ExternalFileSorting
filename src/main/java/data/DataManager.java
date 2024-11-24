@@ -8,9 +8,8 @@ import java.util.Objects;
 import java.util.Random;
 
 public class DataManager {
-    private static final int GRADES_NUM = 3;
-    private final List<Record> records = new ArrayList<>();
     private final int recordNum;
+    private static final int PRINT_LIMIT = 10;
 
     public DataManager(int recordNum) {
         this.recordNum = recordNum;
@@ -37,7 +36,7 @@ public class DataManager {
 
     }
 
-    public void chooseFile() {
+    public String chooseFile() {
         JFileChooser fileChooser = new JFileChooser();
         File defaultDirectory = new File("src/main/java/data");
         fileChooser.setCurrentDirectory(defaultDirectory);
@@ -45,31 +44,14 @@ public class DataManager {
 
         if (result == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
-
-            try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-                String line;
-
-                while ((line = br.readLine()) != null) {
-                    String[] parts = line.split("\\s+");
-                    List<Double> numbers = new ArrayList<>();
-
-                    for (int i = 0; i < GRADES_NUM; i++) {
-                        numbers.add(Double.parseDouble(parts[i]));
-                    }
-
-                    records.add(new Record(numbers));
-                }
-
-                System.out.println("File processed successfully! Records added.");
-            } catch (IOException e) {
-                System.err.println("Error reading file: " + e.getMessage());
-            } catch (NumberFormatException e) {
-                System.err.println("Invalid number format in file: " + e.getMessage());
-            }
+            System.out.println("File selected: " + file.getAbsolutePath());
+            return file.getAbsolutePath();
         } else {
-            System.out.println("File selection canceled.");
+            System.out.println("File selection canceled. Choosing deafult file...");
+            return "src/main/java/data/data.txt";
         }
     }
+
 
     public void readFromKeyboard(String fileName) {
         File file = new File("src/main/java/data/" + fileName + ".txt");
@@ -95,12 +77,6 @@ public class DataManager {
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    public void printRecords() {
-        for (Record record : records) {
-            System.out.println(record);
         }
     }
 
@@ -151,9 +127,8 @@ public class DataManager {
         }
     }
 
-    public static void main(String[] args) {
+    public String getData(String[] args, String fileName){
         String mode;
-        DataManager dataGenerator = new DataManager(100);
         if (args.length < 1) {
             mode = "generate";
         }
@@ -163,21 +138,51 @@ public class DataManager {
         switch (mode.toLowerCase()) {
             case "generate":
                 System.out.println("Generating data...");
-                dataGenerator.generateData("data");
-                dataGenerator.printRecords();
-                break;
+                generateData(fileName);
+                return "src/main/java/data/" + fileName + ".txt";
             case "file":
                 System.out.println("Choose file...");
-                dataGenerator.chooseFile();
-                dataGenerator.printRecords();
-                break;
+                return chooseFile();
             case "keyboard":
                 System.out.println("Reading data from keyboard...");
-                dataGenerator.readFromKeyboard("data");
-                dataGenerator.printRecords();
-                break;
+                readFromKeyboard(fileName);
+                return "src/main/java/data/" + fileName + ".txt";
             default:
                 System.out.println("Invalid mode");
+        }
+        return "src/main/java/data/data.txt";
+    }
+
+    public void printRuns(String args) {
+        int limit = 0;
+        File dir = new File("src/main/java/memory/runs");
+        for(File file: Objects.requireNonNull(dir.listFiles()))
+        {
+            if(args == null)
+                return;
+            else if(args.equals("short"))
+                limit = PRINT_LIMIT;
+            else if(args.equals("full")) //if args[1] is "full" then limit is set to run size
+                limit = runSize(file.getAbsolutePath());
+            System.out.println("--------------------------------------------");
+            System.out.println(file.getName() + " " + runSize(file.getAbsolutePath()) + " records:\n");
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                String line;
+                while ((line = reader.readLine()) != null && limit > 0) {
+                    String[] parts = line.split("\\s+");
+                    List<Double> values = new ArrayList<>();
+                    for (String part : parts) {
+                        values.add(Double.parseDouble(part));
+                    }
+                    Record record = new Record(values);
+                    System.out.println(record.toString());
+                    limit--;
+                    if(limit == 0 && args.equals("short"))
+                        System.out.println("And " + (runSize(file.getAbsolutePath()) - PRINT_LIMIT) + " more...\n");
+                }
+            } catch (IOException e) {
+                System.err.println("Error reading file: " + file.getName() + " - " + e.getMessage());
+            }
         }
     }
 }

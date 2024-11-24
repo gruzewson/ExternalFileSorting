@@ -114,6 +114,27 @@ public class RAM {
         }
     }
 
+    public void externalSort(String args) {
+        initializeMerging();
+        dataManager.printRuns(args);
+
+        while(dataManager.howManyRuns() > 1) {
+            int starterRun = 0;
+            int howManyRuns = dataManager.howManyRuns();
+            for(int i = 0; i < (int) Math.ceil(howManyRuns/(bufferNum-1)); i++) {
+                mergeRuns(starterRun, i);
+                starterRun+=bufferNum-1;
+            }
+            mergeCycles++;
+            dataManager.deleteOldRuns(mergeCycles-2);
+            dataManager.printRuns(args);
+        }
+        System.out.println("Read buffers: " + getReadBuffers());
+        System.out.println("Saved buffers: " + getSavedBuffers());
+        System.out.println("Merge cycles: " + getMergeCycles());
+        System.out.println("I/O operations: " + (savedBuffers+readBuffers));
+    }
+
     private void loadNextBuffer(MergeState state, int bufferIndex) {
         String path = defaultRunPath + (mergeCycles - 1) + (bufferIndex + state.runNum) + ".txt";
 
@@ -155,37 +176,5 @@ public class RAM {
         return mergeCycles;
     }
 
-    public static void main(String[] args) {
-        int recordNum = 100000;
-        int bufferSize = 10;
-        int bufferNum = 50;
-        DataManager dataManager = new DataManager(recordNum);
-        dataManager.generateData("data");
-        RAM merger = new RAM(bufferSize, bufferNum, "src/main/java/data/data.txt", recordNum);
-        merger.initializeMerging();
-        merger.mergeCycles++;
 
-        while(merger.dataManager.howManyRuns() > 1) {
-            int starterRun = 0;
-            int howManyNewRuns;
-            int howManyRuns = merger.dataManager.howManyRuns();
-            if(howManyRuns%(merger.bufferNum-1) == 0) {
-                howManyNewRuns = howManyRuns/(merger.bufferNum-1);
-            }
-            else {
-                howManyNewRuns = howManyRuns/(merger.bufferNum-1) + 1;
-            }
-            for(int i = 0; i < howManyNewRuns; i++) {
-                merger.mergeRuns(starterRun, i);
-                starterRun+=merger.bufferNum-1;
-            }
-            merger.mergeCycles++;
-            merger.dataManager.deleteOldRuns(merger.mergeCycles-2);
-        }
-        System.out.println("Cycles: " + merger.getMergeCycles());
-        System.out.println("Read buffers: " + merger.getReadBuffers());
-        System.out.println("Saved buffers: " + merger.getSavedBuffers());
-        System.out.println("Merge cycles: " + merger.getMergeCycles());
-        System.out.println((merger.savedBuffers+merger.readBuffers));
-    }
 }
