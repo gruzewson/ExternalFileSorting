@@ -3,27 +3,27 @@ package data;
 import java.util.List;
 
 public class Record {
-    private final List<Double> numbers;
-    private final double average;
+    private final List<Float> numbers;
+    private final float average;
 
-    public Record(List<Double> numbers) {
+    public Record(List<Float> numbers) {
         this.numbers = numbers;
         this.average = calculateAverage(numbers);
     }
 
-    private double calculateAverage(List<Double> numbers) {
-        double sum = 0;
-        for (double num : numbers) {
+    private float calculateAverage(List<Float> numbers) {
+        float sum = 0;
+        for (float num : numbers) {
             sum += num;
         }
-        return Math.round((sum / numbers.size()) * 100.0) / 100.0;
+        return (float) (Math.round((sum / numbers.size()) * 100.0) / 100.0);
     }
 
-    public double getAverage() {
+    public float getAverage() {
         return average;
     }
 
-    public double getNumber(int index) {
+    public float getNumber(int index) {
         return numbers.get(index);
     }
 

@@ -36,8 +36,8 @@ public class Buffer {
                     }
                     break;
                 }
-                List<Double> numbers = Arrays.stream(line.split(" "))
-                        .map(Double::parseDouble)
+                List<Float> numbers = Arrays.stream(line.split(" "))
+                        .map(Float::parseFloat)
                         .collect(Collectors.toList());
                 Record record = new Record(numbers);
                 buffer[i] = record;

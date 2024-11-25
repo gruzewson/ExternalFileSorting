@@ -17,8 +17,8 @@ public class DataManager {
 
     public void generateData(String fileName) {
         File file = new File("src/main/java/data/" + fileName + ".txt");
-        double[] options = {2, 3, 3.5, 4, 4.5, 5};
-        double v1, v2, v3;
+        float[] options = {2, 3, 3.5F, 4, 4.5F, 5};
+        float v1, v2, v3;
         Random random = new Random();
 
         try (FileWriter writer = new FileWriter(file)) {
@@ -55,7 +55,7 @@ public class DataManager {
 
     public void readFromKeyboard(String fileName) {
         File file = new File("src/main/java/data/" + fileName + ".txt");
-        double v1, v2, v3;
+        float v1, v2, v3;
         System.out.println("Enter the number of records: ");
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         int recordNum;
@@ -69,9 +69,9 @@ public class DataManager {
         try (FileWriter writer = new FileWriter(file)) {
             for (int i = 0; i < recordNum; i++) {
                 String[] grades = reader.readLine().split("\\s+");
-                v1 = Double.parseDouble(grades[0]);
-                v2 = Double.parseDouble(grades[1]);
-                v3 = Double.parseDouble(grades[2]);
+                v1 = Float.parseFloat(grades[0]);
+                v2 = Float.parseFloat(grades[1]);
+                v3 = Float.parseFloat(grades[2]);
 
                 writer.write(String.format("%.1f %.1f %.1f%n", v1, v2, v3));
             }
@@ -170,9 +170,9 @@ public class DataManager {
                 String line;
                 while ((line = reader.readLine()) != null && limit > 0) {
                     String[] parts = line.split("\\s+");
-                    List<Double> values = new ArrayList<>();
+                    List<Float> values = new ArrayList<>();
                     for (String part : parts) {
-                        values.add(Double.parseDouble(part));
+                        values.add(Float.parseFloat(part));
                     }
                     Record record = new Record(values);
                     System.out.println(record.toString());
