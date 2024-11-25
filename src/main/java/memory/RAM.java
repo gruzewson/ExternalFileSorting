@@ -119,20 +119,32 @@ public class RAM {
         dataManager.printRuns(args);
 
         while(dataManager.howManyRuns() > 1) {
+            mergeCycles++;
             int starterRun = 0;
-            int howManyRuns = dataManager.howManyRuns();
-            for(int i = 0; i < (int) Math.ceil(howManyRuns/(bufferNum-1)); i++) {
+            int howManyNewRuns;
+            if(dataManager.howManyRuns()/(bufferNum-1) % 2 == 0 && dataManager.howManyRuns()/(bufferNum-1) != 0) {
+                howManyNewRuns = dataManager.howManyRuns()/(bufferNum-1);
+            }
+            else {
+                howManyNewRuns = dataManager.howManyRuns()/(bufferNum-1) + 1;
+            }
+            for(int i = 0; i < howManyNewRuns; i++) {
                 mergeRuns(starterRun, i);
                 starterRun+=bufferNum-1;
             }
-            mergeCycles++;
-            dataManager.deleteOldRuns(mergeCycles-2);
+            if(dataManager.howManyRuns() == 1) {
+                dataManager.printRuns(args);
+                break;
+            }
+            dataManager.deleteOldRuns(mergeCycles-1);
             dataManager.printRuns(args);
         }
         System.out.println("Read buffers: " + getReadBuffers());
         System.out.println("Saved buffers: " + getSavedBuffers());
         System.out.println("Merge cycles: " + getMergeCycles());
         System.out.println("I/O operations: " + (savedBuffers+readBuffers));
+        System.out.println("Theoretical Merge Cycles: " + (Math.ceil(Math.log(recordsNum/bufferSize)/Math.log(bufferNum)) - 1));
+        System.out.println("Theoretical I/O operations: " + (2*(recordsNum/bufferSize) + (Math.ceil(2*(recordsNum/bufferSize) * Math.log(recordsNum/bufferSize)/Math.log(bufferNum)))));
     }
 
     private void loadNextBuffer(MergeState state, int bufferIndex) {
